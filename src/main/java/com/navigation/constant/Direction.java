@@ -4,14 +4,14 @@ import lombok.Getter;
 
 @Getter
 public enum Direction {
-    NORTH("N"),
-    EAST("E"),
-    SOUTH("S"),
-    WEST("W");
+  NORTH("N"),
+  EAST("E"),
+  SOUTH("S"),
+  WEST("W");
 
-    private final String symbol;
+  private final String symbol;
 
-    Direction(String symbol) {
-        this.symbol = symbol;
-    }
+  Direction(String symbol) {
+    this.symbol = symbol;
+  }
 }
