@@ -1,2 +1,2 @@
-# mars_rover
+# mars_rover_navigation
 Mars Rover Navigation
