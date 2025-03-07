@@ -12,4 +12,8 @@ import lombok.experimental.SuperBuilder;
 public class Node {
   private Integer verticalPosition;
   private Integer horizontalPosition;
+
+  public String getFinalLocation() {
+    return "[%s, %s]".formatted(this.getHorizontalPosition(), this.getVerticalPosition());
+  }
 }

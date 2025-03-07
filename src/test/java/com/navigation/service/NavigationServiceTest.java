@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.navigation.constant.Command;
 import com.navigation.constant.Direction;
+import com.navigation.constant.Status;
+import com.navigation.exception.RoverException;
 import com.navigation.model.Grid;
 import com.navigation.model.Node;
+import com.navigation.model.Output;
 import com.navigation.model.Rover;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,8 +49,13 @@ class NavigationServiceTest {
 
   @Test
   void isOutOfBound_whenRoverLocationOutsideGrid_returnTrue() {
-    sampleRover.setVerticalPosition(6);
+    sampleRover.setVerticalPosition(5);
     sampleRover.setHorizontalPosition(1);
+
+    assertTrue(navigationService.isOutOfBound(sampleRover, sampleGrid));
+
+    sampleRover.setVerticalPosition(3);
+    sampleRover.setHorizontalPosition(-5);
 
     assertTrue(navigationService.isOutOfBound(sampleRover, sampleGrid));
   }
@@ -73,41 +81,42 @@ class NavigationServiceTest {
   }
 
   @Test
-  void moveForward_givenNorthDirection_increaseVerticalPosition() {
-    navigationService.moveForward(sampleRover, Direction.NORTH);
+  void moveForward_givenNorthDirection_increaseVerticalPosition() throws RoverException {
+    navigationService.moveForward(sampleRover, sampleGrid, Direction.NORTH);
 
     assertEquals(1, sampleRover.getVerticalPosition());
     assertEquals(0, sampleRover.getHorizontalPosition());
   }
 
   @Test
-  void moveForward_givenEastDirection_increaseHorizontalPosition() {
-    navigationService.moveForward(sampleRover, Direction.EAST);
+  void moveForward_givenEastDirection_increaseHorizontalPosition() throws RoverException {
+    navigationService.moveForward(sampleRover, sampleGrid, Direction.EAST);
 
     assertEquals(0, sampleRover.getVerticalPosition());
     assertEquals(1, sampleRover.getHorizontalPosition());
   }
 
   @Test
-  void moveForward_givenSouthDirection_decreaseVerticalPosition() {
-    navigationService.moveForward(sampleRover, Direction.SOUTH);
+  void moveForward_givenSouthDirection_decreaseVerticalPosition() throws RoverException {
+    navigationService.moveForward(sampleRover, sampleGrid, Direction.SOUTH);
 
     assertEquals(-1, sampleRover.getVerticalPosition());
     assertEquals(0, sampleRover.getHorizontalPosition());
   }
 
   @Test
-  void moveForward_givenWestDirection_decreaseHorizontalPosition() {
-    navigationService.moveForward(sampleRover, Direction.WEST);
+  void moveForward_givenWestDirection_decreaseHorizontalPosition() throws RoverException {
+    navigationService.moveForward(sampleRover, sampleGrid, Direction.WEST);
 
     assertEquals(0, sampleRover.getVerticalPosition());
     assertEquals(-1, sampleRover.getHorizontalPosition());
   }
 
   @Test
-  void moveForward_givenNorthDirectionAndMoreRoverSpeed_increaseVerticalPositionMore() {
+  void moveForward_givenNorthDirectionAndMoreRoverSpeed_increaseVerticalPositionMore()
+      throws RoverException {
     sampleRover.setRoverSpeed(2);
-    navigationService.moveForward(sampleRover, Direction.NORTH);
+    navigationService.moveForward(sampleRover, sampleGrid, Direction.NORTH);
 
     assertEquals(2, sampleRover.getVerticalPosition());
     assertEquals(0, sampleRover.getHorizontalPosition());
@@ -154,26 +163,26 @@ class NavigationServiceTest {
   }
 
   @Test
-  void executeCommand_givenMoveCommand_performMoveForward() {
+  void executeCommand_givenMoveCommand_performMoveForward() throws RoverException {
     sampleRover.setCurrentDirection(Direction.NORTH);
-    navigationService.executeCommand(sampleRover, Command.MOVE);
+    navigationService.executeCommand(sampleRover, sampleGrid, Command.MOVE);
 
     assertEquals(1, sampleRover.getVerticalPosition());
     assertEquals(0, sampleRover.getHorizontalPosition());
   }
 
   @Test
-  void executeCommand_givenRightCommand_performTurnRight() {
+  void executeCommand_givenRightCommand_performTurnRight() throws RoverException {
     sampleRover.setCurrentDirection(Direction.NORTH);
-    navigationService.executeCommand(sampleRover, Command.RIGHT);
+    navigationService.executeCommand(sampleRover, sampleGrid, Command.RIGHT);
 
     assertEquals(Direction.EAST, sampleRover.getCurrentDirection());
   }
 
   @Test
-  void executeCommand_givenLeftCommand_performTurnLeft() {
+  void executeCommand_givenLeftCommand_performTurnLeft() throws RoverException {
     sampleRover.setCurrentDirection(Direction.NORTH);
-    navigationService.executeCommand(sampleRover, Command.LEFT);
+    navigationService.executeCommand(sampleRover, sampleGrid, Command.LEFT);
 
     assertEquals(Direction.WEST, sampleRover.getCurrentDirection());
   }
@@ -192,5 +201,188 @@ class NavigationServiceTest {
     sampleRover.setHorizontalPosition(1);
 
     assertFalse(navigationService.encounterObstacle(sampleGrid, sampleRover));
+  }
+
+  @Test
+  void navigateRover_givenCorrectCommand_returnSuccessfulOutput() {
+
+    List<Node> obstacles =
+        List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
+    Node finalNode = Node.builder().horizontalPosition(0).verticalPosition(1).build();
+
+    Output expectedOutput =
+        Output.builder()
+            .finalStatus(Status.SUCCESS.getMessage())
+            .finalPosition(finalNode.getFinalLocation())
+            .finalDirection(Direction.NORTH.getSymbol())
+            .build();
+
+    Output actualOutput = navigationService.navigateRover(5, obstacles, "LMLMLMLMM");
+
+    //    the output is different  because the example's starting position is set x=1 and y=2
+    assertEquals(expectedOutput, actualOutput);
+  }
+
+  @Test
+  void navigateRover_whenRoverRunningInCircle_returnSuccessfulOutput() {
+    List<Node> obstacles =
+        List.of(Node.builder().verticalPosition(2).horizontalPosition(3).build());
+    Node finalNode = Node.builder().verticalPosition(0).horizontalPosition(0).build();
+
+    Output expectedOutput =
+        Output.builder()
+            .finalStatus(Status.SUCCESS.getMessage())
+            .finalPosition(finalNode.getFinalLocation())
+            .finalDirection(Direction.EAST.getSymbol())
+            .build();
+
+    Output actualOutput = navigationService.navigateRover(10, obstacles, "MMMLMMMLMMMLMMM");
+
+    assertEquals(expectedOutput, actualOutput);
+  }
+
+  @Test
+  void navigateRover_givenRunningIntoObstacle_returnBlockedOutput() {
+    List<Node> obstacles =
+        List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
+    Node finalNode = Node.builder().verticalPosition(3).horizontalPosition(3).build();
+
+    Output expectedOutput =
+        Output.builder()
+            .finalStatus(Status.BLOCKED.getMessage())
+            .finalPosition(finalNode.getFinalLocation())
+            .finalDirection(Direction.NORTH.getSymbol())
+            .build();
+
+    Output actualOutput = navigationService.navigateRover(10, obstacles, "RMMMLMMM");
+
+    assertEquals(expectedOutput, actualOutput);
+  }
+
+  @Test
+  void navigateRover_whenGoOverGrid_returnOutboundOutput() {
+    List<Node> obstacles =
+        List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
+    Node finalNode = Node.builder().verticalPosition(4).horizontalPosition(0).build();
+
+    Output expectedOutput =
+        Output.builder()
+            .finalStatus(Status.OUTBOUND.getMessage())
+            .finalPosition(finalNode.getFinalLocation())
+            .finalDirection(Direction.NORTH.getSymbol())
+            .build();
+
+    Output actualOutput = navigationService.navigateRover(5, obstacles, "MMMMMMMM");
+
+    assertEquals(expectedOutput, actualOutput);
+  }
+
+  @Test
+  void navigateRover_givenInvalidCommand_returnInvalidOutput() {
+    List<Node> obstacles =
+        List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
+    Node finalNode = Node.builder().verticalPosition(2).horizontalPosition(2).build();
+
+    Output expectedOutput =
+        Output.builder()
+            .finalStatus(Status.INVALID_COMMAND.getMessage())
+            .finalPosition(finalNode.getFinalLocation())
+            .finalDirection(Direction.NORTH.getSymbol())
+            .build();
+
+    Output actualOutput = navigationService.navigateRover(5, obstacles, "RMMLMMEMMRL");
+
+    assertEquals(expectedOutput, actualOutput);
+  }
+
+  @Test
+  void navigateRover_givenSmallestGridAndMoveCommand_returnOutboundOutput() {
+    List<Node> obstacles =
+        List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
+    Node finalNode = Node.builder().verticalPosition(0).horizontalPosition(0).build();
+
+    Output expectedOutput =
+        Output.builder()
+            .finalStatus(Status.OUTBOUND.getMessage())
+            .finalPosition(finalNode.getFinalLocation())
+            .finalDirection(Direction.EAST.getSymbol())
+            .build();
+
+    Output actualOutput = navigationService.navigateRover(1, obstacles, "RMMLRM");
+
+    assertEquals(expectedOutput, actualOutput);
+  }
+
+  @Test
+  void navigateRover_givenSmallestGridAndTurningCommand_returnSuccessfulOutput() {
+    List<Node> obstacles =
+        List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
+    Node finalNode = Node.builder().verticalPosition(0).horizontalPosition(0).build();
+
+    Output expectedOutput =
+        Output.builder()
+            .finalStatus(Status.SUCCESS.getMessage())
+            .finalPosition(finalNode.getFinalLocation())
+            .finalDirection(Direction.NORTH.getSymbol())
+            .build();
+
+    Output actualOutput = navigationService.navigateRover(1, obstacles, "RRRRLLLLRL");
+
+    assertEquals(expectedOutput, actualOutput);
+  }
+
+  @Test
+  void navigateRover_givenObstaclesAllOverGridAndMoveCommand_returnBlockedOutput() {
+
+    List<Node> obstacles =
+        List.of(
+            Node.builder().horizontalPosition(0).verticalPosition(1).build(),
+            Node.builder().horizontalPosition(1).verticalPosition(1).build(),
+            Node.builder().horizontalPosition(1).verticalPosition(0).build(),
+            Node.builder().horizontalPosition(0).verticalPosition(1).build(),
+            Node.builder().horizontalPosition(0).verticalPosition(-1).build(),
+            Node.builder().horizontalPosition(-1).verticalPosition(-1).build(),
+            Node.builder().horizontalPosition(-1).verticalPosition(0).build(),
+            Node.builder().horizontalPosition(0).verticalPosition(-1).build());
+
+    Node finalNode = Node.builder().verticalPosition(1).horizontalPosition(0).build();
+
+    Output expectedOutput =
+        Output.builder()
+            .finalStatus(Status.BLOCKED.getMessage())
+            .finalPosition(finalNode.getFinalLocation())
+            .finalDirection(Direction.NORTH.getSymbol())
+            .build();
+
+    Output actualOutput = navigationService.navigateRover(2, obstacles, "MRLM");
+
+    assertEquals(expectedOutput, actualOutput);
+  }
+
+  @Test
+  void navigateRover_givenObstaclesAllOverGridAndTurningCommand_returnSuccessfulOutput() {
+    List<Node> obstacles =
+        List.of(
+            Node.builder().horizontalPosition(0).verticalPosition(1).build(),
+            Node.builder().horizontalPosition(1).verticalPosition(1).build(),
+            Node.builder().horizontalPosition(1).verticalPosition(0).build(),
+            Node.builder().horizontalPosition(0).verticalPosition(1).build(),
+            Node.builder().horizontalPosition(0).verticalPosition(-1).build(),
+            Node.builder().horizontalPosition(-1).verticalPosition(-1).build(),
+            Node.builder().horizontalPosition(-1).verticalPosition(0).build(),
+            Node.builder().horizontalPosition(0).verticalPosition(-1).build());
+
+    Node finalNode = Node.builder().verticalPosition(0).horizontalPosition(0).build();
+
+    Output expectedOutput =
+        Output.builder()
+            .finalStatus(Status.SUCCESS.getMessage())
+            .finalPosition(finalNode.getFinalLocation())
+            .finalDirection(Direction.WEST.getSymbol())
+            .build();
+
+    Output actualOutput = navigationService.navigateRover(2, obstacles, "RLLRRLL");
+
+    assertEquals(expectedOutput, actualOutput);
   }
 }

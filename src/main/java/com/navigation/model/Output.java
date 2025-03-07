@@ -1,14 +1,15 @@
 package com.navigation.model;
 
-import com.navigation.constant.Direction;
-import com.navigation.constant.Status;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Builder;
 import lombok.Data;
 
 @Builder
 @Data
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class Output {
-  private Node finalPosition;
-  private Direction finalDirection;
-  private Status finalStatus;
+  private String finalPosition;
+  private String finalDirection;
+  private String finalStatus;
 }
