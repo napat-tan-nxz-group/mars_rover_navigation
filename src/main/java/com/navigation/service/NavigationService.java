@@ -20,6 +20,8 @@ public class NavigationService {
 
   public void navigateRover(Integer gridSize, List<Node> obstacles, String command) {
     log.info("initializing Grid and Rover");
+    initializeGrid(gridSize, obstacles);
+    initializeRover();
   }
 
   public boolean isOutOfBound(Rover rover, Grid grid) {
@@ -48,5 +50,53 @@ public class NavigationService {
     return Command.valueOf(commandString);
   }
 
-  //  TODO: obstacle case
+  public void moveForward(Rover rover, Direction newDirection) {
+    if (newDirection.equals(Direction.NORTH)) {
+      rover.setVerticalPosition(rover.getVerticalPosition() + rover.getRoverSpeed());
+    }
+    if (newDirection.equals(Direction.EAST)) {
+      rover.setHorizontalPosition(rover.getHorizontalPosition() + rover.getRoverSpeed());
+    }
+    if (newDirection.equals(Direction.SOUTH)) {
+      rover.setVerticalPosition(rover.getVerticalPosition() - rover.getRoverSpeed());
+    }
+    if (newDirection.equals(Direction.WEST)) {
+      rover.setHorizontalPosition(rover.getHorizontalPosition() - rover.getRoverSpeed());
+    }
+    log.info("Rover is now at: {}, {}", rover.getVerticalPosition(), rover.getHorizontalPosition());
+  }
+
+  public Direction getRightDirection(Direction currentDirection) {
+    if (currentDirection.equals(Direction.NORTH)) return Direction.EAST;
+    if (currentDirection.equals(Direction.EAST)) return Direction.SOUTH;
+    if (currentDirection.equals(Direction.SOUTH)) return Direction.WEST;
+    //    final RIGHT
+    else return Direction.NORTH;
+  }
+
+  public Direction getLeftDirection(Direction currentDirection) {
+    if (currentDirection.equals(Direction.NORTH)) return Direction.WEST;
+    if (currentDirection.equals(Direction.EAST)) return Direction.NORTH;
+    if (currentDirection.equals(Direction.SOUTH)) return Direction.EAST;
+    //    finally LEFT
+    else return Direction.SOUTH;
+  }
+
+  public void executeCommand(Rover rover, Command command) {
+    if (command.equals(Command.MOVE)) {
+      log.info("Moving Forward");
+      moveForward(rover, rover.getCurrentDirection()); // move forward command
+    }
+    //    change direction command
+    if (command.equals(Command.LEFT)) {
+      Direction newDirection = getLeftDirection(rover.getCurrentDirection());
+      log.info("Turning left to Direction: {}", newDirection);
+      rover.setCurrentDirection(newDirection);
+    }
+    if (command.equals(Command.RIGHT)) {
+      Direction newDirection = getRightDirection(rover.getCurrentDirection());
+      log.info("Turning right to Direction: {}", newDirection);
+      rover.setCurrentDirection(newDirection);
+    }
+  }
 }
