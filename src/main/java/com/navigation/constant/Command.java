@@ -4,14 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum Command {
-  LEFT("L"),
-  RIGHT("R"),
-  MOVE("M"),
+  LEFT(),
+  RIGHT(),
+  MOVE(),
+  INVALID(),
   ;
-
-  private final String symbol;
-
-  Command(String symbol) {
-    this.symbol = symbol;
-  }
 }

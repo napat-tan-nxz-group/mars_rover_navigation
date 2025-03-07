@@ -47,7 +47,12 @@ public class NavigationService {
   }
 
   public Command interpretCommand(String commandString) {
-    return Command.valueOf(commandString);
+    return switch (commandString) {
+      case "M" -> Command.MOVE;
+      case "L" -> Command.LEFT;
+      case "R" -> Command.RIGHT;
+      default -> Command.INVALID;
+    };
   }
 
   public void moveForward(Rover rover, Direction newDirection) {

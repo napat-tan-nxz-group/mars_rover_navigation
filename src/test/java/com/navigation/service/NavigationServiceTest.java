@@ -26,6 +26,7 @@ class NavigationServiceTest {
         Rover.builder()
             .horizontalPosition(0)
             .verticalPosition(0)
+            .roverSpeed(1)
             .currentDirection(Direction.NORTH)
             .build();
   }
@@ -62,8 +63,8 @@ class NavigationServiceTest {
   }
 
   @Test
-  void interpretCommand_givenOtherChar_throwException() {
-    assertThrows(IllegalArgumentException.class, () -> navigationService.interpretCommand("G"));
+  void interpretCommand_givenOtherChar_returnInvalidCommand() {
+    assertEquals(Command.INVALID, navigationService.interpretCommand("G"));
   }
 
   @Test
