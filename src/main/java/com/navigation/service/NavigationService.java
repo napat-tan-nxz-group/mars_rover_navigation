@@ -104,4 +104,13 @@ public class NavigationService {
       rover.setCurrentDirection(newDirection);
     }
   }
+
+  public boolean encounterObstacle(Grid grid, Rover rover) {
+    return grid.getObstacles()
+        .contains(
+            Node.builder()
+                .horizontalPosition(rover.getHorizontalPosition())
+                .verticalPosition(rover.getVerticalPosition())
+                .build());
+  }
 }

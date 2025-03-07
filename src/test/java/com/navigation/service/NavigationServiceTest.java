@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.navigation.constant.Command;
 import com.navigation.constant.Direction;
 import com.navigation.model.Grid;
+import com.navigation.model.Node;
 import com.navigation.model.Rover;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +23,10 @@ class NavigationServiceTest {
 
   @BeforeEach
   void setup() {
-    sampleGrid = Grid.builder().verticalSize(5).horizontalSize(5).build();
+    List<Node> obstacles =
+        List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
+
+    sampleGrid = Grid.builder().verticalSize(5).horizontalSize(5).obstacles(obstacles).build();
     sampleRover =
         Rover.builder()
             .horizontalPosition(0)
@@ -171,5 +176,21 @@ class NavigationServiceTest {
     navigationService.executeCommand(sampleRover, Command.LEFT);
 
     assertEquals(Direction.WEST, sampleRover.getCurrentDirection());
+  }
+
+  @Test
+  void encounterObstacle_givenRoverOnObstacle_returnTrue() {
+    sampleRover.setVerticalPosition(3);
+    sampleRover.setHorizontalPosition(3);
+
+    assertTrue(navigationService.encounterObstacle(sampleGrid, sampleRover));
+  }
+
+  @Test
+  void encounterObstacle_givenAnywhereElse_returnFalse() {
+    sampleRover.setVerticalPosition(3);
+    sampleRover.setHorizontalPosition(1);
+
+    assertFalse(navigationService.encounterObstacle(sampleGrid, sampleRover));
   }
 }
