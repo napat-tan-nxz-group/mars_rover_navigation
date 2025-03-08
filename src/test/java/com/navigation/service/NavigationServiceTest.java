@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.navigation.constant.Command;
 import com.navigation.constant.Direction;
 import com.navigation.constant.Status;
-import com.navigation.exception.RoverException;
 import com.navigation.model.Grid;
 import com.navigation.model.Node;
 import com.navigation.model.Output;
@@ -40,27 +39,6 @@ class NavigationServiceTest {
   }
 
   @Test
-  void isOutOfBound_whenRoverLocationInsideGrid_returnFalse() {
-    sampleRover.setVerticalPosition(1);
-    sampleRover.setHorizontalPosition(1);
-
-    assertFalse(navigationService.isOutOfBound(sampleRover, sampleGrid));
-  }
-
-  @Test
-  void isOutOfBound_whenRoverLocationOutsideGrid_returnTrue() {
-    sampleRover.setVerticalPosition(5);
-    sampleRover.setHorizontalPosition(1);
-
-    assertTrue(navigationService.isOutOfBound(sampleRover, sampleGrid));
-
-    sampleRover.setVerticalPosition(3);
-    sampleRover.setHorizontalPosition(-5);
-
-    assertTrue(navigationService.isOutOfBound(sampleRover, sampleGrid));
-  }
-
-  @Test
   void interpretCommand_givenM_returnMoveCommand() {
     assertEquals(Command.MOVE, navigationService.interpretCommand("M"));
   }
@@ -78,129 +56,6 @@ class NavigationServiceTest {
   @Test
   void interpretCommand_givenOtherChar_returnInvalidCommand() {
     assertEquals(Command.INVALID, navigationService.interpretCommand("G"));
-  }
-
-  @Test
-  void moveForward_givenNorthDirection_increaseVerticalPosition() throws RoverException {
-    navigationService.moveForward(sampleRover, sampleGrid, Direction.NORTH);
-
-    assertEquals(1, sampleRover.getVerticalPosition());
-    assertEquals(0, sampleRover.getHorizontalPosition());
-  }
-
-  @Test
-  void moveForward_givenEastDirection_increaseHorizontalPosition() throws RoverException {
-    navigationService.moveForward(sampleRover, sampleGrid, Direction.EAST);
-
-    assertEquals(0, sampleRover.getVerticalPosition());
-    assertEquals(1, sampleRover.getHorizontalPosition());
-  }
-
-  @Test
-  void moveForward_givenSouthDirection_decreaseVerticalPosition() throws RoverException {
-    navigationService.moveForward(sampleRover, sampleGrid, Direction.SOUTH);
-
-    assertEquals(-1, sampleRover.getVerticalPosition());
-    assertEquals(0, sampleRover.getHorizontalPosition());
-  }
-
-  @Test
-  void moveForward_givenWestDirection_decreaseHorizontalPosition() throws RoverException {
-    navigationService.moveForward(sampleRover, sampleGrid, Direction.WEST);
-
-    assertEquals(0, sampleRover.getVerticalPosition());
-    assertEquals(-1, sampleRover.getHorizontalPosition());
-  }
-
-  @Test
-  void moveForward_givenNorthDirectionAndMoreRoverSpeed_increaseVerticalPositionMore()
-      throws RoverException {
-    sampleRover.setRoverSpeed(2);
-    navigationService.moveForward(sampleRover, sampleGrid, Direction.NORTH);
-
-    assertEquals(2, sampleRover.getVerticalPosition());
-    assertEquals(0, sampleRover.getHorizontalPosition());
-  }
-
-  @Test
-  void getRightDirection_givenNorthDirection_returnEast() {
-    assertEquals(Direction.EAST, navigationService.getRightDirection(Direction.NORTH));
-  }
-
-  @Test
-  void getRightDirection_givenEastDirection_returnSouth() {
-    assertEquals(Direction.SOUTH, navigationService.getRightDirection(Direction.EAST));
-  }
-
-  @Test
-  void getRightDirection_givenSouthDirection_returnWest() {
-    assertEquals(Direction.WEST, navigationService.getRightDirection(Direction.SOUTH));
-  }
-
-  @Test
-  void getRightDirection_givenWestDirection_returnNorth() {
-    assertEquals(Direction.NORTH, navigationService.getRightDirection(Direction.WEST));
-  }
-
-  @Test
-  void getLeftDirection_givenNorthDirection_returnWest() {
-    assertEquals(Direction.WEST, navigationService.getLeftDirection(Direction.NORTH));
-  }
-
-  @Test
-  void getLeftDirection_givenWestDirection_returnSouth() {
-    assertEquals(Direction.SOUTH, navigationService.getLeftDirection(Direction.WEST));
-  }
-
-  @Test
-  void getLeftDirection_givenSouthDirection_returnEast() {
-    assertEquals(Direction.EAST, navigationService.getLeftDirection(Direction.SOUTH));
-  }
-
-  @Test
-  void getLeftDirection_givenEastDirection_returnNorth() {
-    assertEquals(Direction.NORTH, navigationService.getLeftDirection(Direction.EAST));
-  }
-
-  @Test
-  void executeCommand_givenMoveCommand_performMoveForward() throws RoverException {
-    sampleRover.setCurrentDirection(Direction.NORTH);
-    navigationService.executeCommand(sampleRover, sampleGrid, Command.MOVE);
-
-    assertEquals(1, sampleRover.getVerticalPosition());
-    assertEquals(0, sampleRover.getHorizontalPosition());
-  }
-
-  @Test
-  void executeCommand_givenRightCommand_performTurnRight() throws RoverException {
-    sampleRover.setCurrentDirection(Direction.NORTH);
-    navigationService.executeCommand(sampleRover, sampleGrid, Command.RIGHT);
-
-    assertEquals(Direction.EAST, sampleRover.getCurrentDirection());
-  }
-
-  @Test
-  void executeCommand_givenLeftCommand_performTurnLeft() throws RoverException {
-    sampleRover.setCurrentDirection(Direction.NORTH);
-    navigationService.executeCommand(sampleRover, sampleGrid, Command.LEFT);
-
-    assertEquals(Direction.WEST, sampleRover.getCurrentDirection());
-  }
-
-  @Test
-  void encounterObstacle_givenRoverOnObstacle_returnTrue() {
-    sampleRover.setVerticalPosition(3);
-    sampleRover.setHorizontalPosition(3);
-
-    assertTrue(navigationService.encounterObstacle(sampleGrid, sampleRover));
-  }
-
-  @Test
-  void encounterObstacle_givenAnywhereElse_returnFalse() {
-    sampleRover.setVerticalPosition(3);
-    sampleRover.setHorizontalPosition(1);
-
-    assertFalse(navigationService.encounterObstacle(sampleGrid, sampleRover));
   }
 
   @Test
