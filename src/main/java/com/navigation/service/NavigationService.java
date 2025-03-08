@@ -42,6 +42,7 @@ public class NavigationService {
         rover.executeCommand(currentGrid, currentCommand);
       }
       //    all command processed successfully
+      log.info("Navigation Successful");
       return Output.builder()
           .finalDirection(rover.getCurrentDirection().getSymbol())
           .finalPosition(rover.getFinalLocation())

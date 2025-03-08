@@ -54,6 +54,7 @@ public class Rover extends Node {
 
     //    encounter obstacle
     if (encounterObstacle(grid)) {
+      log.error("Rover encountered obstacle");
       throw new RoverException(
           Output.builder()
               .finalDirection(this.getCurrentDirection().getSymbol())
