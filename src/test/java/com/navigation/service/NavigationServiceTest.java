@@ -5,12 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.navigation.constant.Command;
 import com.navigation.constant.Direction;
 import com.navigation.constant.Status;
-import com.navigation.model.Grid;
 import com.navigation.model.Node;
 import com.navigation.model.Output;
-import com.navigation.model.Rover;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,24 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class NavigationServiceTest {
 
-  private Grid sampleGrid;
-  private Rover sampleRover;
   @InjectMocks private NavigationService navigationService;
-
-  @BeforeEach
-  void setup() {
-    List<Node> obstacles =
-        List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
-
-    sampleGrid = Grid.builder().verticalSize(5).horizontalSize(5).obstacles(obstacles).build();
-    sampleRover =
-        Rover.builder()
-            .horizontalPosition(0)
-            .verticalPosition(0)
-            .roverSpeed(1)
-            .currentDirection(Direction.NORTH)
-            .build();
-  }
 
   @Test
   void interpretCommand_givenM_returnMoveCommand() {
