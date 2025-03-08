@@ -7,6 +7,7 @@ import com.navigation.exception.RoverException;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -46,7 +47,8 @@ public class Rover extends Node {
               .finalDirection(this.getCurrentDirection().getSymbol())
               .finalPosition(this.getFinalLocation())
               .finalStatus(Status.OUTBOUND.getMessage())
-              .build());
+              .build(),
+          HttpStatus.OK);
     }
 
     this.setVerticalPosition(newPosition.getVerticalPosition());
@@ -60,7 +62,8 @@ public class Rover extends Node {
               .finalDirection(this.getCurrentDirection().getSymbol())
               .finalPosition(this.getFinalLocation())
               .finalStatus(Status.BLOCKED.getMessage())
-              .build());
+              .build(),
+          HttpStatus.OK);
     }
     log.info("Rover is now at: {}, {}", this.getHorizontalPosition(), this.getVerticalPosition());
   }
@@ -96,7 +99,8 @@ public class Rover extends Node {
               .finalDirection(this.getCurrentDirection().getSymbol())
               .finalPosition(this.getFinalLocation())
               .finalStatus(Status.INVALID_DIRECTION.getMessage())
-              .build());
+              .build(),
+          HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -112,7 +116,8 @@ public class Rover extends Node {
               .finalDirection(this.getCurrentDirection().getSymbol())
               .finalPosition(this.getFinalLocation())
               .finalStatus(Status.INVALID_DIRECTION.getMessage())
-              .build());
+              .build(),
+          HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -128,7 +133,8 @@ public class Rover extends Node {
               .finalDirection(this.getCurrentDirection().getSymbol())
               .finalPosition(this.getFinalLocation())
               .finalStatus(Status.INVALID_DIRECTION.getMessage())
-              .build());
+              .build(),
+          HttpStatus.BAD_REQUEST);
     }
   }
 

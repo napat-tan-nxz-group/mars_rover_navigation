@@ -1,5 +1,6 @@
 package com.navigation.controller;
 
+import com.navigation.exception.RoverException;
 import com.navigation.model.NavigateRequestBody;
 import com.navigation.model.Node;
 import com.navigation.model.Output;
@@ -24,11 +25,15 @@ public class NavigationController {
 
   @GetMapping("rover/navigate")
   public ResponseEntity<Output> navigateRover(@RequestBody NavigateRequestBody requestBody) {
-    List<Node> obstacles = getObstacleNodes(requestBody);
-    Output output =
-        navigationService.navigateRover(
-            requestBody.getGridSize(), obstacles, requestBody.getCommands());
-    return ResponseEntity.ok(output);
+    try {
+      List<Node> obstacles = getObstacleNodes(requestBody);
+      Output output =
+          navigationService.navigateRover(
+              requestBody.getGridSize(), obstacles, requestBody.getCommands());
+      return ResponseEntity.ok(output);
+    } catch (RoverException e) {
+      return new ResponseEntity<>(e.getOutput(), e.getStatus());
+    }
   }
 
   public List<Node> getObstacleNodes(NavigateRequestBody requestBody) {

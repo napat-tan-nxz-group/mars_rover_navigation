@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.navigation.constant.Command;
 import com.navigation.constant.Direction;
 import com.navigation.constant.Status;
+import com.navigation.exception.RoverException;
 import com.navigation.model.Node;
 import com.navigation.model.Output;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class NavigationServiceTest {
@@ -39,7 +41,7 @@ class NavigationServiceTest {
   }
 
   @Test
-  void navigateRover_givenCorrectCommand_returnSuccessfulOutput() {
+  void navigateRover_givenCorrectCommand_returnSuccessfulOutput() throws RoverException {
 
     List<Node> obstacles =
         List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
@@ -59,7 +61,7 @@ class NavigationServiceTest {
   }
 
   @Test
-  void navigateRover_whenRoverRunningInCircle_returnSuccessfulOutput() {
+  void navigateRover_whenRoverRunningInCircle_returnSuccessfulOutput() throws RoverException {
     List<Node> obstacles =
         List.of(Node.builder().verticalPosition(2).horizontalPosition(3).build());
     Node finalNode = Node.builder().verticalPosition(0).horizontalPosition(0).build();
@@ -89,9 +91,12 @@ class NavigationServiceTest {
             .finalDirection(Direction.NORTH.getSymbol())
             .build();
 
-    Output actualOutput = navigationService.navigateRover(10, obstacles, "RMMMLMMM");
+    RoverException actualException =
+        assertThrows(
+            RoverException.class, () -> navigationService.navigateRover(10, obstacles, "RMMMLMMM"));
 
-    assertEquals(expectedOutput, actualOutput);
+    assertEquals(expectedOutput, actualException.getOutput());
+    assertEquals(HttpStatus.OK, actualException.getStatus());
   }
 
   @Test
@@ -107,9 +112,12 @@ class NavigationServiceTest {
             .finalDirection(Direction.NORTH.getSymbol())
             .build();
 
-    Output actualOutput = navigationService.navigateRover(5, obstacles, "MMMMMMMM");
+    RoverException actualException =
+        assertThrows(
+            RoverException.class, () -> navigationService.navigateRover(5, obstacles, "MMMMMMMM"));
 
-    assertEquals(expectedOutput, actualOutput);
+    assertEquals(expectedOutput, actualException.getOutput());
+    assertEquals(HttpStatus.OK, actualException.getStatus());
   }
 
   @Test
@@ -125,13 +133,17 @@ class NavigationServiceTest {
             .finalDirection(Direction.NORTH.getSymbol())
             .build();
 
-    Output actualOutput = navigationService.navigateRover(5, obstacles, "RMMLMMEMMRL");
+    RoverException actualException =
+        assertThrows(
+            RoverException.class,
+            () -> navigationService.navigateRover(5, obstacles, "RMMLMMEMMRL"));
 
-    assertEquals(expectedOutput, actualOutput);
+    assertEquals(expectedOutput, actualException.getOutput());
+    assertEquals(HttpStatus.BAD_REQUEST, actualException.getStatus());
   }
 
   @Test
-  void navigateRover_givenSmallestGridAndMoveCommand_returnOutboundOutput() {
+  void navigateRover_givenSmallestGridAndMoveCommand_returnOutboundOutput() throws RoverException {
     List<Node> obstacles =
         List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
     Node finalNode = Node.builder().verticalPosition(0).horizontalPosition(0).build();
@@ -143,13 +155,17 @@ class NavigationServiceTest {
             .finalDirection(Direction.EAST.getSymbol())
             .build();
 
-    Output actualOutput = navigationService.navigateRover(1, obstacles, "RMMLRM");
+    RoverException actualException =
+        assertThrows(
+            RoverException.class, () -> navigationService.navigateRover(1, obstacles, "RMMLRM"));
 
-    assertEquals(expectedOutput, actualOutput);
+    assertEquals(expectedOutput, actualException.getOutput());
+    assertEquals(HttpStatus.OK, actualException.getStatus());
   }
 
   @Test
-  void navigateRover_givenSmallestGridAndTurningCommand_returnSuccessfulOutput() {
+  void navigateRover_givenSmallestGridAndTurningCommand_returnSuccessfulOutput()
+      throws RoverException {
     List<Node> obstacles =
         List.of(Node.builder().verticalPosition(3).horizontalPosition(3).build());
     Node finalNode = Node.builder().verticalPosition(0).horizontalPosition(0).build();
@@ -167,7 +183,8 @@ class NavigationServiceTest {
   }
 
   @Test
-  void navigateRover_givenObstaclesAllOverGridAndMoveCommand_returnBlockedOutput() {
+  void navigateRover_givenObstaclesAllOverGridAndMoveCommand_returnBlockedOutput()
+      throws RoverException {
 
     List<Node> obstacles =
         List.of(
@@ -189,13 +206,17 @@ class NavigationServiceTest {
             .finalDirection(Direction.NORTH.getSymbol())
             .build();
 
-    Output actualOutput = navigationService.navigateRover(2, obstacles, "MRLM");
+    RoverException actualException =
+        assertThrows(
+            RoverException.class, () -> navigationService.navigateRover(2, obstacles, "MRLM"));
 
-    assertEquals(expectedOutput, actualOutput);
+    assertEquals(expectedOutput, actualException.getOutput());
+    assertEquals(HttpStatus.OK, actualException.getStatus());
   }
 
   @Test
-  void navigateRover_givenObstaclesAllOverGridAndTurningCommand_returnSuccessfulOutput() {
+  void navigateRover_givenObstaclesAllOverGridAndTurningCommand_returnSuccessfulOutput()
+      throws RoverException {
     List<Node> obstacles =
         List.of(
             Node.builder().horizontalPosition(0).verticalPosition(1).build(),

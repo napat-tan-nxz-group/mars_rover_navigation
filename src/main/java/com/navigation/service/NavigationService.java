@@ -7,6 +7,7 @@ import com.navigation.exception.RoverException;
 import com.navigation.model.*;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,37 +21,35 @@ public class NavigationService {
   private Grid currentGrid;
   private Rover rover;
 
-  public Output navigateRover(Integer gridSize, List<Node> obstacles, String commands) {
-    try {
-      log.info("initializing Grid and Rover");
-      initializeGrid(gridSize, obstacles);
-      initializeRover();
+  public Output navigateRover(Integer gridSize, List<Node> obstacles, String commands)
+      throws RoverException {
+    log.info("initializing Grid and Rover");
+    initializeGrid(gridSize, obstacles);
+    initializeRover();
 
-      for (char c : commands.toCharArray()) {
-        Command currentCommand = interpretCommand(String.valueOf(c));
-        //      check for invalid command
-        if (currentCommand.equals(Command.INVALID)) {
-          log.error("Invalid Command");
-          throw new RoverException(
-              Output.builder()
-                  .finalDirection(rover.getCurrentDirection().getSymbol())
-                  .finalPosition(rover.getFinalLocation())
-                  .finalStatus(Status.INVALID_COMMAND.getMessage())
-                  .build());
-        }
-        //      perform command
-        rover.executeCommand(currentGrid, currentCommand);
+    for (char c : commands.toCharArray()) {
+      Command currentCommand = interpretCommand(String.valueOf(c));
+      //      check for invalid command
+      if (currentCommand.equals(Command.INVALID)) {
+        log.error("Invalid Command");
+        throw new RoverException(
+            Output.builder()
+                .finalDirection(rover.getCurrentDirection().getSymbol())
+                .finalPosition(rover.getFinalLocation())
+                .finalStatus(Status.INVALID_COMMAND.getMessage())
+                .build(),
+            HttpStatus.BAD_REQUEST);
       }
-      //    all command processed successfully
-      log.info("Navigation Successful");
-      return Output.builder()
-          .finalDirection(rover.getCurrentDirection().getSymbol())
-          .finalPosition(rover.getFinalLocation())
-          .finalStatus(Status.SUCCESS.getMessage())
-          .build();
-    } catch (RoverException e) {
-      return e.getOutput();
+      //      perform command
+      rover.executeCommand(currentGrid, currentCommand);
     }
+    //    all command processed successfully
+    log.info("Navigation Successful");
+    return Output.builder()
+        .finalDirection(rover.getCurrentDirection().getSymbol())
+        .finalPosition(rover.getFinalLocation())
+        .finalStatus(Status.SUCCESS.getMessage())
+        .build();
   }
 
   private void initializeGrid(Integer gridSize, List<Node> obstacles) {
