@@ -70,28 +70,20 @@ public class Rover extends Node {
 
   public Node reposition(Direction newDirection) throws RoverException {
     if (newDirection.equals(Direction.NORTH)) {
-      return Node.builder()
-          .horizontalPosition(this.getHorizontalPosition())
-          .verticalPosition(this.getVerticalPosition() + this.getRoverSpeed())
-          .build();
+      return buildNode(
+          this.getHorizontalPosition(), this.getVerticalPosition() + this.getRoverSpeed());
     }
     if (newDirection.equals(Direction.EAST)) {
-      return Node.builder()
-          .horizontalPosition(this.getHorizontalPosition() + this.getRoverSpeed())
-          .verticalPosition(this.getVerticalPosition())
-          .build();
+      return buildNode(
+          this.getHorizontalPosition() + this.getRoverSpeed(), this.getVerticalPosition());
     }
     if (newDirection.equals(Direction.SOUTH)) {
-      return Node.builder()
-          .horizontalPosition(this.getHorizontalPosition())
-          .verticalPosition(this.getVerticalPosition() - this.getRoverSpeed())
-          .build();
+      return buildNode(
+          this.getHorizontalPosition(), this.getVerticalPosition() - this.getRoverSpeed());
     }
     if (newDirection.equals(Direction.WEST)) {
-      return Node.builder()
-          .horizontalPosition(this.getHorizontalPosition() - this.getRoverSpeed())
-          .verticalPosition(this.getVerticalPosition())
-          .build();
+      return buildNode(
+          this.getHorizontalPosition() - this.getRoverSpeed(), this.getVerticalPosition());
     } else {
       log.error("Invalid Reposition Direction");
       throw new RoverException(
@@ -102,6 +94,10 @@ public class Rover extends Node {
               .build(),
           HttpStatus.BAD_REQUEST);
     }
+  }
+
+  private Node buildNode(Integer horizontal, Integer vertical) {
+    return Node.builder().horizontalPosition(horizontal).verticalPosition(vertical).build();
   }
 
   public Direction getRightDirection(Direction currentDirection) throws RoverException {
